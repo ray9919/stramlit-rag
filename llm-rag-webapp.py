@@ -11,21 +11,39 @@ import streamlit as st
 import requests as req
 from typing import List, Tuple, Dict
 import uuid
+from streamlit import runtime
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+def get_remote_ip() -> str:
+    """Get remote ip."""
+
+    try:
+        ctx = get_script_run_ctx()
+        if ctx is None:
+            return None
+
+        session_info = runtime.get_instance().get_client(ctx.session_id)
+        if session_info is None:
+            return None
+    except Exception as e:
+        return None
+
+    return session_info.request.remote_ip
 
 
-def _get_session():
-    from streamlit.runtime import get_instance
-    from streamlit.runtime.scriptrunner import get_script_run_ctx
-    runtime = get_instance()
-    session_id_str = get_script_run_ctx().session_id
-    session_info = runtime._session_mgr.get_session_info(session_id_str)
-    if session_info is None:
-        raise RuntimeError("Couldn't get your Streamlit Session object.")
-    return session_info.session.id
+# def _get_session():
+#     from streamlit.runtime import get_instance
+#     from streamlit.runtime.scriptrunner import get_script_run_ctx
+#     runtime = get_instance()
+#     session_id_str = get_script_run_ctx().session_id
+#     session_info = runtime._session_mgr.get_session_info(session_id_str)
+#     if session_info is None:
+#         raise RuntimeError("Couldn't get your Streamlit Session object.")
+#     return session_info.session.id
 
 
 # 生成唯一的会话 ID
-session_id = _get_session()
+session_id = get_remote_ip()
 
 print(f"session_id={session_id}")
 
